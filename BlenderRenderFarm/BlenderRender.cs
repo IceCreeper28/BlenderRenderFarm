@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BlenderRenderFarm.Extensions;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -71,6 +72,46 @@ namespace BlenderRenderFarm {
             blenderProcess.BeginErrorReadLine();
             return blenderProcess.WaitForExitAsync(cancellationToken);
         }
+
+        public string GetFramePathWithoutExtension(int frameIndex) {
+            // ensure index mask
+            var maskStartIndex = RenderOutput.IndexOf('#');
+            string fileWithMask = RenderOutput;
+            if (maskStartIndex == -1) {
+                fileWithMask += "####";
+                maskStartIndex = fileWithMask.Length;
+            }
+
+            // find mask
+            var maskEndIndex = maskStartIndex + 1;
+            while (maskEndIndex < fileWithMask.Length && fileWithMask[maskEndIndex] == '#')
+                maskEndIndex++;
+            var maskLength = maskEndIndex - maskStartIndex;
+
+            // replace mask
+            var paddedFrameIndex = frameIndex.ToString().PadLeft(maskLength, '0');
+            var filePath = fileWithMask.AsSpan().Replace(maskStartIndex, maskLength, paddedFrameIndex);
+
+            // make file path absolute
+            if (filePath.StartsWith("//")) {
+                var relativePath = fileWithMask.Substring(2);
+                var directory = Path.GetDirectoryName(BlendFilePath);
+                filePath = Path.GetFullPath(relativePath, directory);
+            }
+
+            return filePath;
+        }
+        public string GetFramePath(int frameIndex, string extension) {
+            return Path.ChangeExtension(GetFramePathWithoutExtension(frameIndex), extension);
+        }
+        public string? FindFrameFile(int frameIndex) {
+            var framePath = GetFramePathWithoutExtension(frameIndex);
+            var frameDirectory = Path.GetDirectoryName(framePath);
+            var frameFileWithoutExtension = Path.GetFileName(framePath);
+            foreach (var file in Directory.EnumerateFiles(frameDirectory))
+                if (file.StartsWith(frameFileWithoutExtension))
+                    return file;
+            return null;
         }
 
     }
