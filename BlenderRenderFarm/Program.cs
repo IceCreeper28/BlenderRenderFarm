@@ -20,13 +20,13 @@ namespace BlenderRenderFarm {
             var render = new BlenderRender() {
                 BlenderPath = blenderPath,
                 BlendFilePath = Path.Combine(desktopPath, @"Test\test.blend"),
-                OutputDirectory = Path.Combine(desktopPath, @"Test\out\frame######.frame"),
-                Frame = ^10
+                RenderOutput = Path.Combine(desktopPath, @"//out\frame######.test")
             };
+
             render.Output += (s, e) => Console.Out.WriteLine(e);
             render.Error += (s, e) => Console.Error.WriteLine(e);
             render.Progress += (s, e) => e.DumpToConsole();
-            await render.RunAsync();
+            await render.RenderFrameAsync(^10);
 
             Console.Read();
         }

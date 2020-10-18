@@ -7,13 +7,25 @@ using System.Threading.Tasks;
 namespace BlenderRenderFarm {
     public class BlenderRender {
 
-        public string BlenderPath { get; init; }
-        public string BlendFilePath { get; init; }
-        public string OutputDirectory { get; init; }
-        public Range Frames { get; init; }
-        public Index Frame { 
-            init {
-                Frames = new Range(value, value);
+        private string _blenderPath;
+        private string _blendFilePath;
+        private string _renderOutput;
+
+        public string BlenderPath {
+            get => _blenderPath;
+            set => _blenderPath = Path.GetFullPath(value);
+        }
+        public string BlendFilePath {
+            get => _blendFilePath;
+            set => _blendFilePath = Path.GetFullPath(value);
+        }
+        public string RenderOutput {
+            get => _renderOutput;
+            set {
+                _renderOutput = value;
+
+                if (!_renderOutput.StartsWith("//")) // check if not relative path
+                    _renderOutput = Path.GetFullPath(_renderOutput);
             }
         }
 
@@ -21,19 +33,18 @@ namespace BlenderRenderFarm {
         public event EventHandler<string> Error;
         public event EventHandler<BlenderRenderProgressOutput> Progress;
 
+        public Task RenderFrameAsync(Index frame, CancellationToken cancellationToken = default) =>
+            RenderFramesAsync(frame..frame, cancellationToken);
         // TODO optimize for when progress is null
-        public async Task RunAsync(CancellationToken cancellationToken = default) {
-            var blenderPath = Path.GetFullPath(BlenderPath);
-            var blendFilePath = Path.GetFullPath(BlendFilePath);
-            var outputDirectory = Path.GetFullPath(OutputDirectory);
-            var frameStart = (Frames.Start.IsFromEnd ? '-' : '+') + Frames.Start.Value.ToString();
-            var frameEnd = (Frames.End.IsFromEnd ? '-' : '+') + Frames.End.Value.ToString();
+        public Task RenderFramesAsync(Range frames, CancellationToken cancellationToken = default) {
+            var frameStart = (frames.Start.IsFromEnd ? '-' : '+') + frames.Start.Value.ToString();
+            var frameEnd = (frames.End.IsFromEnd ? '-' : '+') + frames.End.Value.ToString();
             var frameRange = $"{frameStart}..{frameEnd}";
 
             var blenderProcess = new Process();
             blenderProcess.StartInfo = new ProcessStartInfo() {
-                FileName = blenderPath,
-                Arguments = $"--background \"{blendFilePath}\" --render-output \"{outputDirectory}\" --log * --threads 0 --render-frame {frameRange}",
+                FileName = BlenderPath,
+                Arguments = $"--background \"{BlendFilePath}\" --render-output \"{RenderOutput}\" --log * --threads 0 --render-frame {frameRange}",
                 // CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
@@ -58,7 +69,8 @@ namespace BlenderRenderFarm {
             blenderProcess.Start();
             blenderProcess.BeginOutputReadLine();
             blenderProcess.BeginErrorReadLine();
-            await blenderProcess.WaitForExitAsync(cancellationToken);
+            return blenderProcess.WaitForExitAsync(cancellationToken);
+        }
         }
 
     }
