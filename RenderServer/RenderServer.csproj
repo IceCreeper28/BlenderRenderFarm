@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Open.NAT.Core" Version="2.1.0.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BlenderRenderFarm\BlenderRenderFarm.csproj" />
+    <ProjectReference Include="..\ObjectDump\ObjectDump.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -30,32 +30,42 @@ namespace BlenderRenderFarm {
             }
         }
 
-        public event EventHandler<string> Output;
-        public event EventHandler<string> Error;
-        public event EventHandler<BlenderRenderProgressOutput> Progress;
+        public event EventHandler<string>? Output;
+        public event EventHandler<string>? Error;
+        public event EventHandler<BlenderRenderProgressOutput>? Progress;
 
+        public Task RenderFrameAsync(int frame, CancellationToken cancellationToken = default) =>
+            RenderFramesAsync(frame.ToString(), cancellationToken);
+        public Task RenderFramesAsync(int startFrame, int endFrame, CancellationToken cancellationToken = default) =>
+            RenderFramesAsync($"{startFrame}..{endFrame}", cancellationToken);
         public Task RenderFrameAsync(Index frame, CancellationToken cancellationToken = default) =>
             RenderFramesAsync(frame..frame, cancellationToken);
-        // TODO optimize for when progress is null
         public Task RenderFramesAsync(Range frames, CancellationToken cancellationToken = default) {
             var frameStart = (frames.Start.IsFromEnd ? '-' : '+') + frames.Start.Value.ToString();
             var frameEnd = (frames.End.IsFromEnd ? '-' : '+') + frames.End.Value.ToString();
             var frameRange = $"{frameStart}..{frameEnd}";
-
-            var blenderProcess = new Process();
-            blenderProcess.StartInfo = new ProcessStartInfo() {
-                FileName = BlenderPath,
-                Arguments = $"--background \"{BlendFilePath}\" --render-output \"{RenderOutput}\" --log * --threads 0 --render-frame {frameRange}",
-                // CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false // required for redirection
+            return RenderFramesAsync(frameRange, cancellationToken);
+        }
+        private async Task RenderFramesAsync(string frameRange, CancellationToken cancellationToken = default) {
+            BlendFilePath = @"C:\Users\Admin\Desktop\Test\test.blend";
+            RenderOutput = @"C:\Users\Admin\Desktop\Test\out\frame######";
+            using var blenderProcess = new Process {
+                StartInfo = new ProcessStartInfo() {
+                    FileName = BlenderPath,
+                    Arguments = $"--background \"{BlendFilePath}\" --render-output \"{RenderOutput}\" --log * --debug --threads 0 --render-frame {frameRange}",
+                    // CreateNoWindow = false,
+                    // WindowStyle = ProcessWindowStyle.Normal,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    UseShellExecute = false // required for redirection
+                }
             };
 
             blenderProcess.OutputDataReceived += (s, e) => {
                 if (e.Data is null)
                     return;
-                var output = BlenderRenderProgressOutput.FromLine(e.Data);
+                BlenderRenderProgressOutput output = null; //BlenderRenderProgressOutput.FromLine(e.Data);
                 if (output != null)
                     Progress?.Invoke(this, output);
                 else
@@ -70,7 +80,8 @@ namespace BlenderRenderFarm {
             blenderProcess.Start();
             blenderProcess.BeginOutputReadLine();
             blenderProcess.BeginErrorReadLine();
-            return blenderProcess.WaitForExitAsync(cancellationToken);
+            await blenderProcess.StandardInput.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken);
+            await blenderProcess.WaitForExitAsync(cancellationToken);
         }
 
         public string GetFramePathWithoutExtension(int frameIndex) {
@@ -109,7 +120,7 @@ namespace BlenderRenderFarm {
             var frameDirectory = Path.GetDirectoryName(framePath);
             var frameFileWithoutExtension = Path.GetFileName(framePath);
             foreach (var file in Directory.EnumerateFiles(frameDirectory))
-                if (file.StartsWith(frameFileWithoutExtension))
+                if (Path.GetFileNameWithoutExtension(file) == frameFileWithoutExtension)
                     return file;
             return null;
         }

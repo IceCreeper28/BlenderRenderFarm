@@ -1,12 +1,36 @@
-﻿using BlenderRenderFarm.Extensions;
-using System;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿namespace BlenderRenderFarm {
 
-namespace BlenderRenderFarm {
-    class Program {
+    /*
+    public enum Message {
+        TestA,
+        TestB
+    }
+    public static class Program {
         static async Task Main(string[] args) {
+
+            
+
+            Test();
+            void Test() {
+                var bytes = new byte[10];
+                var span = bytes.AsSpan();
+                var writer = new SpanWriter(span);
+                writer.WriteEnum(Message.TestA);
+                writer.WriteEnum(Message.TestB);
+                var reader = new SpanReader(span);
+                Console.WriteLine(reader.ReadEnum<Message>());
+                Console.WriteLine(reader.ReadEnum<Message>());
+            }
+
+
+            var discoverer = new NatDiscoverer();
+            var cts = new CancellationTokenSource(10000);
+            var device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
+            var ip = await device.GetExternalIPAsync();
+            Console.WriteLine(ip);
+            await device.CreatePortMapAsync(new Mapping(Protocol.Tcp, 24242, 24242, "Test mapping"));
+
+
             // var output = BlenderRenderProgressOutput.FromLine(@"Fra:1 Mem:1217.50M (0.00M, Peak 1928.75M) | Time:01:42.41 | Remaining:01:41.37 | Mem:1050.48M, Peak:1052.07M | Scene, View Layer | Rendered 66/135 Tiles, Sample 72/128, Denoised 50 tiles");
             // output.DumpToConsole();
 
@@ -30,5 +54,5 @@ namespace BlenderRenderFarm {
 
             Console.Read();
         }
-    }
+    }*/
 }
