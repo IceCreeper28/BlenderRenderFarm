@@ -27,6 +27,7 @@ namespace BlenderRenderFarm {
 
         public async Task ConnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default) {
             await Client.ConnectAsync(endPoint, cancellationToken);
+            await Client.ReadMessagesAsync(cancellationToken);
         }
 
         public void Disconnect() {
