@@ -6,8 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Object.Dump" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\BlenderRenderFarm\BlenderRenderFarm.csproj" />
-    <ProjectReference Include="..\ObjectDump\ObjectDump.csproj" />
   </ItemGroup>
 
 </Project>

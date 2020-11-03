@@ -72,7 +72,7 @@ namespace BlenderRenderFarm {
 
         private void SendMessage(long clientId, object message) {
             var bytes = MessagePackSerializer.Typeless.Serialize(message);
-            Server.QueueMessage(clientId, bytes);
+            Server.EnqueueMessage(clientId, bytes);
         }
 
         private void HandleMessage(long clientId, object messageObject) {
