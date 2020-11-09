@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace RenderServer {
     public static class Program {
-        static async Task Main() {
+        public static async Task Main() {
             TaskScheduler.UnobservedTaskException += (s, e) => Console.Error.WriteLine(e);
 
             Console.WriteLine("Enter blend file path:");
@@ -19,16 +19,16 @@ namespace RenderServer {
                 Console.WriteLine("Seting up port forwarding...");
                 var discoverer = new NatDiscoverer();
                 var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-                device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts);
-                var ip = await device.GetExternalIPAsync();
+                device = await discoverer.DiscoverDeviceAsync(PortMapper.Upnp, cts).ConfigureAwait(false);
+                var ip = await device.GetExternalIPAsync().ConfigureAwait(false);
                 Console.WriteLine("External IP: " + ip);
                 mapping = new Mapping(Protocol.Tcp, 42424, 42424, "BlenderRenderFarm");
-                await device.CreatePortMapAsync(mapping);
+                await device.CreatePortMapAsync(mapping).ConfigureAwait(false);
                 Console.WriteLine("Forwarded port 42424");
 
                 var blendFileBytes = File.ReadAllBytes(blendFilePath);
                 server = new BlenderRenderFarm.RenderServer(blendFileBytes, 10);
-                server.FrameReceived += (frameIndex, bytes) => {
+                server.FrameReceived += (frameIndex, _) => {
                     Console.WriteLine("Frame received: " + frameIndex);
                 };
                 server.FrameProgress += (frameIndex, remaining) => {
@@ -38,13 +38,13 @@ namespace RenderServer {
                     Console.WriteLine("Frame failure: " + frameIndex + ", Reason: " + reason);
                 };
 
-                await server.ListenAsync();
+                await server.ListenAsync().ConfigureAwait(false);
                 Console.WriteLine("Started Server - Press enter to stop");
 
                 Console.Read();
             } finally {
                 server?.Stop();
-                await device?.DeletePortMapAsync(mapping);
+                await device.DeletePortMapAsync(mapping).ConfigureAwait(false);
             }
         }
     }

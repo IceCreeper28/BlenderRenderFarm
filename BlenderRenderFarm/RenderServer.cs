@@ -19,11 +19,11 @@ namespace BlenderRenderFarm {
         public event FrameFailureEventHandler? FrameFailure;
         public delegate void FrameFailureEventHandler(Index frameIndex, string reason);
 
-        private byte[] BlendFileBytes;
-        private ConcurrentBag<Index> FailedFrames = new ConcurrentBag<Index>();
-        private ConcurrentDictionary<long, List<Index>> AssignedFrames = new ConcurrentDictionary<long, List<Index>>();
+        private readonly byte[] BlendFileBytes;
+        private readonly ConcurrentBag<Index> FailedFrames = new ConcurrentBag<Index>();
+        private readonly ConcurrentDictionary<long, List<Index>> AssignedFrames = new ConcurrentDictionary<long, List<Index>>();
         private int NextFrame = 1;
-        private int FrameCount;
+        private readonly int FrameCount;
 
         public RenderServer(byte[] blendFileBytes, int frameCount) {
             Server = new BasicTcpServer(42424);
@@ -36,7 +36,7 @@ namespace BlenderRenderFarm {
         }
 
         public async Task ListenAsync(CancellationToken cancellationToken = default) {
-            await Server.ListenAsync(cancellationToken);
+            await Server.ListenAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Stop() {
@@ -65,7 +65,7 @@ namespace BlenderRenderFarm {
                 foreach (var frame in frameList)
                     FailedFrames.Add(frame);
         }
-        private void Server_MessageReceived(long clientId, ReadOnlySpan<byte> message) {
+        private void Server_MessageReceived(long clientId, Span<byte> message) {
             var messageObject = MessagePackSerializer.Typeless.Deserialize(message.ToArray());
             HandleMessage(clientId, messageObject);
         }
@@ -104,8 +104,7 @@ namespace BlenderRenderFarm {
         }
 
         private bool TryAssignNextFrame(long clientId) {
-            Index frameIndex;
-            if (!FailedFrames.TryTake(out frameIndex) && !TryGetNextFrame(out frameIndex))
+            if (!FailedFrames.TryTake(out var frameIndex) && !TryGetNextFrame(out frameIndex))
                 return false;
             AssignFrame(clientId, frameIndex);
             return true;

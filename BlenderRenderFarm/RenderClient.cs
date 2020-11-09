@@ -26,8 +26,8 @@ namespace BlenderRenderFarm {
         }
 
         public async Task ConnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default) {
-            await Client.ConnectAsync(endPoint, cancellationToken);
-            await Client.ReadMessagesAsync(cancellationToken);
+            await Client.ConnectAsync(endPoint, cancellationToken).ConfigureAwait(false);
+            await Client.ReadMessagesAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public void Disconnect() {
@@ -53,7 +53,7 @@ namespace BlenderRenderFarm {
             });
         }
 
-        private void Client_MessageReceived(ReadOnlySpan<byte> message) {
+        private void Client_MessageReceived(Span<byte> message) {
             var messageObject = MessagePackSerializer.Typeless.Deserialize(message.ToArray());
             HandleMessage(messageObject);
         }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace RenderClient {
     public static class Program {
-        static async Task Main() {
+        public static async Task Main() {
             TaskScheduler.UnobservedTaskException += (s, e) => Console.Error.WriteLine(e);
 
             Console.WriteLine("Enter server ip:");
@@ -34,9 +34,9 @@ namespace RenderClient {
                     RenderOutput = renderOutputScheme
                 };
 
-                render.Output += (s, e) => Console.Out.WriteLine(e);
-                render.Error += (s, e) => Console.Error.WriteLine(e);
-                render.Progress += (s, e) => e.DumpToConsole();
+                render.Output += (_, e) => Console.Out.WriteLine(e);
+                render.Error += (_, e) => Console.Error.WriteLine(e);
+                render.Progress += (_, e) => e.DumpToConsole();
 
                 client = new BlenderRenderFarm.RenderClient();
                 client.RenderInit += blendFileBytes => {
@@ -49,13 +49,13 @@ namespace RenderClient {
                     Task.Run(async () => {
                         Console.WriteLine($"Rendering frame {frameIndex}...");
                         try {
-                            await render.RenderFrameAsync(frameIndex.Value); // TODO
+                            await render.RenderFrameAsync(frameIndex.Value).ConfigureAwait(false); // TODO
                             Console.WriteLine($"Finished rendering frame {frameIndex}");
                             var framePath = render.FindFrameFile(frameIndex.Value); // TODO
                             var frameBytes = File.ReadAllBytes(framePath);
                             client.SendFrameBytes(frameIndex, frameBytes);
                         } catch(Exception e) {
-                            Console.WriteLine($"Render failure: " + e);
+                            Console.WriteLine($"Render failure: {e}");
                             throw;
                         }
                     });
@@ -64,7 +64,7 @@ namespace RenderClient {
                     Console.WriteLine("Frame cancelled: " + frameIndex + ", Reason: " + reason);
                 };
 
-                await client.ConnectAsync(new IPEndPoint(IPAddress.Parse(serverIp), 42424));
+                await client.ConnectAsync(new IPEndPoint(IPAddress.Parse(serverIp), 42424)).ConfigureAwait(false);
                 Console.WriteLine("Started Client - Press enter to stop");
 
                 Console.Read();

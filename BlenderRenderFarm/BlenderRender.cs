@@ -65,7 +65,7 @@ namespace BlenderRenderFarm {
             blenderProcess.OutputDataReceived += (s, e) => {
                 if (e.Data is null)
                     return;
-                BlenderRenderProgressOutput output = null; //BlenderRenderProgressOutput.FromLine(e.Data);
+                BlenderRenderProgressOutput? output = BlenderRenderProgressOutput.FromLine(e.Data);
                 if (output != null)
                     Progress?.Invoke(this, output);
                 else
@@ -80,8 +80,8 @@ namespace BlenderRenderFarm {
             blenderProcess.Start();
             blenderProcess.BeginOutputReadLine();
             blenderProcess.BeginErrorReadLine();
-            await blenderProcess.StandardInput.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken);
-            await blenderProcess.WaitForExitAsync(cancellationToken);
+            await blenderProcess.StandardInput.WriteLineAsync(ReadOnlyMemory<char>.Empty, cancellationToken).ConfigureAwait(false);
+            await blenderProcess.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public string GetFramePathWithoutExtension(int frameIndex) {
@@ -105,9 +105,9 @@ namespace BlenderRenderFarm {
 
             // make file path absolute
             if (filePath.StartsWith("//")) {
-                var relativePath = fileWithMask.Substring(2);
+                var relativePath = fileWithMask[2..];
                 var directory = Path.GetDirectoryName(BlendFilePath);
-                filePath = Path.GetFullPath(relativePath, directory);
+                filePath = Path.GetFullPath(relativePath, directory!);
             }
 
             return filePath;
@@ -119,7 +119,7 @@ namespace BlenderRenderFarm {
             var framePath = GetFramePathWithoutExtension(frameIndex);
             var frameDirectory = Path.GetDirectoryName(framePath);
             var frameFileWithoutExtension = Path.GetFileName(framePath);
-            foreach (var file in Directory.EnumerateFiles(frameDirectory))
+            foreach (var file in Directory.EnumerateFiles(frameDirectory!))
                 if (Path.GetFileNameWithoutExtension(file) == frameFileWithoutExtension)
                     return file;
             return null;

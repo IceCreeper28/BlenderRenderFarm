@@ -4,10 +4,11 @@
     <OutputType>Library</OutputType>
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>Enable</Nullable>
+    <NeutralLanguage>en</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Basic.Tcp" Version="1.0.0" />
+    <PackageReference Include="Basic.Tcp" Version="2.0.0" />
     <PackageReference Include="ConfigureAwait.Fody" Version="3.3.1" />
     <PackageReference Include="Lazy.Fody" Version="1.9.0" />
     <PackageReference Include="MessagePack" Version="2.2.60" />

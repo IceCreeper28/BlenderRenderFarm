@@ -20,24 +20,25 @@ namespace BlenderRenderFarm {
         public int SampleCount { get; private set; }
         public int DenoisedTiles { get; private set; }
 
-        public static BlenderRenderProgressOutput FromLine(string line) {
+        public static BlenderRenderProgressOutput? FromLine(string line) {
             var match = LineRegex.Match(line);
             if (!match.Success)
                 return null;
 
-            var output = new BlenderRenderProgressOutput();
-            output.FrameIndex = int.Parse(match.Groups["FrameIndex"].Value);
-            output.ElapsedTime = ParseTime(match.Groups["ElapsedTime"].Value);
-            output.RemainingTime = ParseTime(match.Groups["RemainingTime"].Value);
-            output.RenderedTiles = int.Parse(match.Groups["RenderedTiles"].Value);
-            output.TileCount = int.Parse(match.Groups["TileCount"].Value);
-            output.CurrentSample = int.Parse(match.Groups["CurrentSample"].Value);
-            output.SampleCount = int.Parse(match.Groups["SampleCount"].Value);
-            output.DenoisedTiles = int.Parse(match.Groups["DenoisedTiles"].Value);
+            var output = new BlenderRenderProgressOutput {
+                FrameIndex = int.Parse(match.Groups["FrameIndex"].Value),
+                ElapsedTime = ParseTime(match.Groups["ElapsedTime"].Value),
+                RemainingTime = ParseTime(match.Groups["RemainingTime"].Value),
+                RenderedTiles = int.Parse(match.Groups["RenderedTiles"].Value),
+                TileCount = int.Parse(match.Groups["TileCount"].Value),
+                CurrentSample = int.Parse(match.Groups["CurrentSample"].Value),
+                SampleCount = int.Parse(match.Groups["SampleCount"].Value),
+                DenoisedTiles = int.Parse(match.Groups["DenoisedTiles"].Value)
+            };
 
             return output;
 
-            TimeSpan ParseTime(ReadOnlySpan<char> value) {
+            static TimeSpan ParseTime(ReadOnlySpan<char> value) {
                 var colonIndex = value.IndexOf(':');
                 // var dotIndex = value[colonIndex..].IndexOf('.');
                 var minutesStr = value[0..colonIndex];
