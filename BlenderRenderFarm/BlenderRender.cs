@@ -1,9 +1,9 @@
-﻿using BlenderRenderFarm.Extensions;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BlenderRenderFarm.Extensions;
 
 namespace BlenderRenderFarm {
     public class BlenderRender {
@@ -13,18 +13,18 @@ namespace BlenderRenderFarm {
 
         public string BlenderPath {
             get => _blenderPath;
-            set => _blenderPath = Path.GetFullPath(value);
+            init => _blenderPath = Path.GetFullPath(value);
         }
         public string BlendFilePath {
             get => _blendFilePath;
-            set => _blendFilePath = Path.GetFullPath(value);
+            init => _blendFilePath = Path.GetFullPath(value);
         }
         public string RenderOutput {
             get => _renderOutput;
-            set {
+            init {
                 _renderOutput = value;
 
-                if (!_renderOutput.StartsWith("//", StringComparison.Ordinal)) // check if not relative path
+                if (!_renderOutput.StartsWith("//", StringComparison.Ordinal))
                     _renderOutput = Path.GetFullPath(_renderOutput);
             }
         }
@@ -33,9 +33,9 @@ namespace BlenderRenderFarm {
         public event EventHandler<string>? Error;
         public event EventHandler<BlenderRenderProgressOutput>? Progress;
 
-        public Task RenderFrameAsync(int frame, CancellationToken cancellationToken = default) =>
+        public Task RenderFrameAsync(uint frame, CancellationToken cancellationToken = default) =>
             RenderFramesAsync(frame.ToString(), cancellationToken);
-        public Task RenderFramesAsync(int startFrame, int endFrame, CancellationToken cancellationToken = default) =>
+        public Task RenderFramesAsync(uint startFrame, uint endFrame, CancellationToken cancellationToken = default) =>
             RenderFramesAsync($"{startFrame}..{endFrame}", cancellationToken);
         public Task RenderFrameAsync(Index frame, CancellationToken cancellationToken = default) =>
             RenderFramesAsync(frame..frame, cancellationToken);
@@ -46,8 +46,6 @@ namespace BlenderRenderFarm {
             return RenderFramesAsync(frameRange, cancellationToken);
         }
         private async Task RenderFramesAsync(string frameRange, CancellationToken cancellationToken = default) {
-            BlendFilePath = @"C:\Users\Admin\Desktop\Test\test.blend";
-            RenderOutput = @"C:\Users\Admin\Desktop\Test\out\frame######";
             using var blenderProcess = new Process {
                 StartInfo = new ProcessStartInfo() {
                     FileName = BlenderPath,
@@ -83,7 +81,7 @@ namespace BlenderRenderFarm {
             await blenderProcess.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        public string GetFramePathWithoutExtension(int frameIndex) {
+        public string GetFramePathWithoutExtension(uint frameIndex) {
             // ensure index mask
             var maskStartIndex = RenderOutput.IndexOf('#');
             string fileWithMask = RenderOutput;
@@ -111,10 +109,10 @@ namespace BlenderRenderFarm {
 
             return filePath;
         }
-        public string GetFramePath(int frameIndex, string extension) {
+        public string GetFramePath(uint frameIndex, string extension) {
             return Path.ChangeExtension(GetFramePathWithoutExtension(frameIndex), extension);
         }
-        public string? FindFrameFile(int frameIndex) {
+        public string? FindFrameFile(uint frameIndex) {
             var framePath = GetFramePathWithoutExtension(frameIndex);
             var frameDirectory = Path.GetDirectoryName(framePath);
             var frameFileWithoutExtension = Path.GetFileName(framePath);

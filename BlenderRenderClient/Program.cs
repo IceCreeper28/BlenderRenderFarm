@@ -1,10 +1,10 @@
-﻿using BlenderRenderFarm;
-using ObjectDump.Extensions;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using BlenderRenderFarm;
+using ObjectDump.Extensions;
 
 namespace RenderClient {
     public static class Program {
@@ -49,12 +49,12 @@ namespace RenderClient {
                     Task.Run(async () => {
                         Console.WriteLine($"Rendering frame {frameIndex}...");
                         try {
-                            await render.RenderFrameAsync(frameIndex.Value).ConfigureAwait(false); // TODO
+                            await render.RenderFrameAsync(frameIndex).ConfigureAwait(false); // TODO
                             Console.WriteLine($"Finished rendering frame {frameIndex}");
-                            var framePath = render.FindFrameFile(frameIndex.Value); // TODO
+                            var framePath = render.FindFrameFile(frameIndex); // TODO
                             var frameBytes = File.ReadAllBytes(framePath);
                             client.SendFrameBytes(frameIndex, frameBytes);
-                        } catch(Exception e) {
+                        } catch (Exception e) {
                             Console.WriteLine($"Render failure: {e}");
                             throw;
                         }

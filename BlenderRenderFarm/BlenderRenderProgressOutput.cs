@@ -1,6 +1,6 @@
-﻿using Lazy;
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
+using Lazy;
 
 namespace BlenderRenderFarm {
     public class BlenderRenderProgressOutput {
@@ -39,7 +39,7 @@ namespace BlenderRenderFarm {
                 var colonIndex = value.IndexOf(':');
                 // var dotIndex = value[colonIndex..].IndexOf('.');
                 var minutesStr = value[0..colonIndex];
-                var secondsStr = value[(colonIndex+1)..];
+                var secondsStr = value[(colonIndex + 1)..];
                 var minutes = int.Parse(minutesStr);
                 var seconds = double.Parse(secondsStr);
                 return TimeSpan.FromSeconds((minutes * 60) + seconds);

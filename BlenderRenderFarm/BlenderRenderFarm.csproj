@@ -8,8 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Flare.Tcp" Version="0.1.0" />
-    <PackageReference Include="MessagePack" Version="2.2.60" />
+    <PackageReference Include="Flare.Tcp" Version="0.2.1" />
+    <PackageReference Include="Lazy.Fody" Version="1.9.0" />
+    <PackageReference Include="MessagePack" Version="2.2.85" />
   </ItemGroup>
   
   <ItemGroup>

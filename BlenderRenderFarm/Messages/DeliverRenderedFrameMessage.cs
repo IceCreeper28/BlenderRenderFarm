@@ -1,5 +1,5 @@
-﻿using MessagePack;
-using System;
+﻿using System;
+using MessagePack;
 
 namespace BlenderRenderFarm.Messages {
     [MessagePackObject]

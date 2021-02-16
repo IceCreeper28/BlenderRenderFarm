@@ -1,12 +1,12 @@
-﻿using BlenderRenderFarm.Messages;
-using Flare.Tcp;
-using Memowned;
-using MessagePack;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using BlenderRenderFarm.Messages;
+using Flare.Tcp;
+using Memowned;
+using MessagePack;
 
 namespace BlenderRenderFarm {
     public class RenderServer : IDisposable {
@@ -34,8 +34,8 @@ namespace BlenderRenderFarm {
             FrameCount = frameCount;
         }
 
-        public async Task ListenAsync(CancellationToken cancellationToken = default) {
-            await Server.ListenAsync(42424, cancellationToken).ConfigureAwait(false);
+        public Task ListenAsync(CancellationToken cancellationToken = default) {
+            return Server.ListenAsync(42424, cancellationToken);
         }
 
         public void Stop() {
@@ -92,7 +92,7 @@ namespace BlenderRenderFarm {
 
         protected virtual void OnFrameReceived(long clientId, DeliverRenderedFrameMessage message) {
             var frameBag = AssignedFrames.GetOrAdd(clientId, new List<uint>());
-            lock(frameBag) {
+            lock (frameBag) {
                 frameBag.Remove(message.FrameIndex);
             }
             FrameReceived?.Invoke(message.FrameIndex, message.ImageBytes);

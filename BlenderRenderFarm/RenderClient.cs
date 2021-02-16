@@ -1,11 +1,11 @@
-﻿using BlenderRenderFarm.Messages;
-using Flare.Tcp;
-using Memowned;
-using MessagePack;
-using System;
+﻿using System;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using BlenderRenderFarm.Messages;
+using Flare.Tcp;
+using Memowned;
+using MessagePack;
 
 namespace BlenderRenderFarm {
     public class RenderClient : IDisposable {
