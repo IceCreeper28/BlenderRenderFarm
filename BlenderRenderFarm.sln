@@ -5,9 +5,9 @@ VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlenderRenderFarm", "BlenderRenderFarm\BlenderRenderFarm.csproj", "{1B3214D5-C0A7-4DF9-AA6A-CD5A05D8F4F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderClient", "RenderClient\RenderClient.csproj", "{E466341D-873B-4199-B811-31F5DCD50E59}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlenderRenderClient", "BlenderRenderClient\BlenderRenderClient.csproj", "{E466341D-873B-4199-B811-31F5DCD50E59}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RenderServer", "RenderServer\RenderServer.csproj", "{222292FA-EC9D-40B4-9CCF-10964BD50734}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlenderRenderServer", "BlenderRenderServer\BlenderRenderServer.csproj", "{222292FA-EC9D-40B4-9CCF-10964BD50734}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

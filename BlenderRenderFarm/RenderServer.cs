@@ -1,5 +1,6 @@
-﻿using Basic.Tcp;
-using BlenderRenderFarm.Messages;
+﻿using BlenderRenderFarm.Messages;
+using Flare.Tcp;
+using Memowned;
 using MessagePack;
 using System;
 using System.Collections.Concurrent;
@@ -8,25 +9,23 @@ using System.Threading;
 using System.Threading.Tasks;
 
 namespace BlenderRenderFarm {
-    public class RenderServer {
-
-        private readonly BasicTcpServer Server;
+    public class RenderServer : IDisposable {
+        private readonly ConcurrentFlareTcpServer Server = new();
 
         public event FrameReceivedEventHandler? FrameReceived;
-        public delegate void FrameReceivedEventHandler(Index frameIndex, byte[] frameBytes);
+        public delegate void FrameReceivedEventHandler(uint frameIndex, byte[] frameBytes);
         public event FrameProgressEventHandler? FrameProgress;
-        public delegate void FrameProgressEventHandler(Index frameIndex, TimeSpan remaining);
+        public delegate void FrameProgressEventHandler(uint frameIndex, TimeSpan remaining);
         public event FrameFailureEventHandler? FrameFailure;
-        public delegate void FrameFailureEventHandler(Index frameIndex, string reason);
+        public delegate void FrameFailureEventHandler(uint frameIndex, string reason);
 
         private readonly byte[] BlendFileBytes;
-        private readonly ConcurrentBag<Index> FailedFrames = new ConcurrentBag<Index>();
-        private readonly ConcurrentDictionary<long, List<Index>> AssignedFrames = new ConcurrentDictionary<long, List<Index>>();
-        private int NextFrame = 1;
-        private readonly int FrameCount;
+        private readonly ConcurrentQueue<uint> FailedFrames = new();
+        private readonly ConcurrentDictionary<long, List<uint>> AssignedFrames = new();
+        private uint NextFrame = 1;
+        private readonly uint FrameCount;
 
-        public RenderServer(byte[] blendFileBytes, int frameCount) {
-            Server = new BasicTcpServer(42424);
+        public RenderServer(byte[] blendFileBytes, uint frameCount) {
             Server.MessageReceived += Server_MessageReceived;
             Server.ClientConnected += Server_ClientConnected;
             Server.ClientDisconnected += Server_ClientDisconnected;
@@ -36,14 +35,14 @@ namespace BlenderRenderFarm {
         }
 
         public async Task ListenAsync(CancellationToken cancellationToken = default) {
-            await Server.ListenAsync(cancellationToken).ConfigureAwait(false);
+            await Server.ListenAsync(42424, cancellationToken).ConfigureAwait(false);
         }
 
         public void Stop() {
-            Server.Stop();
+            Server.Shutdown();
         }
 
-        private bool TryGetNextFrame(out Index nextFrame) {
+        private bool TryGetNextFrame(out uint nextFrame) {
             nextFrame = Interlocked.Increment(ref NextFrame) - 1;
             return nextFrame.Value < FrameCount; // TODO
         }
@@ -63,10 +62,10 @@ namespace BlenderRenderFarm {
             Console.WriteLine($"Client {clientId} disconnected");
             if (AssignedFrames.TryRemove(clientId, out var frameList))
                 foreach (var frame in frameList)
-                    FailedFrames.Add(frame);
+                    FailedFrames.Enqueue(frame);
         }
-        private void Server_MessageReceived(long clientId, Span<byte> message) {
-            var messageObject = MessagePackSerializer.Typeless.Deserialize(message.ToArray());
+        private void Server_MessageReceived(long clientId, RentedMemory<byte> message) {
+            var messageObject = MessagePackSerializer.Typeless.Deserialize(message.Memory);
             HandleMessage(clientId, messageObject);
         }
 
@@ -92,30 +91,30 @@ namespace BlenderRenderFarm {
         }
 
         protected virtual void OnFrameReceived(long clientId, DeliverRenderedFrameMessage message) {
-            var frameBag = AssignedFrames.GetOrAdd(clientId, new List<Index>());
+            var frameBag = AssignedFrames.GetOrAdd(clientId, new List<uint>());
             lock(frameBag) {
                 frameBag.Remove(message.FrameIndex);
             }
             FrameReceived?.Invoke(message.FrameIndex, message.ImageBytes);
 
             if (!TryAssignNextFrame(clientId)) {
-                Server.Stop();
+                Server.Shutdown();
             }
         }
 
         private bool TryAssignNextFrame(long clientId) {
-            if (!FailedFrames.TryTake(out var frameIndex) && !TryGetNextFrame(out frameIndex))
+            if (!FailedFrames.TryDequeue(out var frameIndex) && !TryGetNextFrame(out frameIndex))
                 return false;
             AssignFrame(clientId, frameIndex);
             return true;
         }
 
-        private void AssignFrame(long clientId, Index frameIndex) {
+        private void AssignFrame(long clientId, uint frameIndex) {
             Console.WriteLine($"Assigning frame {frameIndex} to client {clientId}");
             SendMessage(clientId, new AssignFrameMessage() {
                 FrameIndex = frameIndex
             });
-            var frameBag = AssignedFrames.GetOrAdd(clientId, new List<Index>());
+            var frameBag = AssignedFrames.GetOrAdd(clientId, new List<uint>());
             frameBag.Add(frameIndex);
         }
 
@@ -124,11 +123,11 @@ namespace BlenderRenderFarm {
         }
 
         protected virtual void OnFrameFailure(long clientId, FrameRenderFailureMessage message) {
-            var frameBag = AssignedFrames.GetOrAdd(clientId, new List<Index>());
+            var frameBag = AssignedFrames.GetOrAdd(clientId, new List<uint>());
             lock (frameBag) {
                 frameBag.Remove(message.FrameIndex);
             }
-            FailedFrames.Add(message.FrameIndex);
+            FailedFrames.Enqueue(message.FrameIndex);
 
             FrameFailure?.Invoke(message.FrameIndex, message.Reason);
 
@@ -137,6 +136,7 @@ namespace BlenderRenderFarm {
 
         public void Dispose() {
             Server?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

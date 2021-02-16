@@ -1,16 +1,12 @@
-﻿
-using MessagePack;
-using System;
+﻿using MessagePack;
 
 namespace BlenderRenderFarm.Messages {
     [MessagePackObject]
-    public class DeliverRenderedFrameMessage {
-
+    public sealed class DeliverRenderedFrameMessage {
         [Key(0)]
-        public Index FrameIndex { get; init; }
+        public uint FrameIndex { get; init; }
 
         [Key(1)]
         public byte[] ImageBytes { get; init; }
-
     }
 }

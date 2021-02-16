@@ -1,12 +1,14 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>BlenderRenderClient</AssemblyName>
+    <RootNamespace>BlenderRenderClient</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Open.NAT.Core" Version="2.1.0.5" />
+    <PackageReference Include="Object.Dump" Version="1.0.0" />
   </ItemGroup>
 
   <ItemGroup>

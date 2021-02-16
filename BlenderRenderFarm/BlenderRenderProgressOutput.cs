@@ -4,9 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace BlenderRenderFarm {
     public class BlenderRenderProgressOutput {
-
         [Lazy]
-        private static Regex LineRegex => new Regex(
+        private static Regex LineRegex => new(
             @"^Fra:(?<FrameIndex>\d+) [^|]*\| Time:(?<ElapsedTime>[\d:.]+) \| Remaining:(?<RemainingTime>[\d:.]+) \| [^|]* \| [^|]* \| Rendered (?<RenderedTiles>\d+)\/(?<TileCount>\d+) Tiles, Sample (?<CurrentSample>\d+)\/(?<SampleCount>\d+), Denoised (?<DenoisedTiles>\d+) tiles$",
             RegexOptions.IgnoreCase
         );
@@ -25,7 +24,7 @@ namespace BlenderRenderFarm {
             if (!match.Success)
                 return null;
 
-            var output = new BlenderRenderProgressOutput {
+            return new BlenderRenderProgressOutput {
                 FrameIndex = int.Parse(match.Groups["FrameIndex"].Value),
                 ElapsedTime = ParseTime(match.Groups["ElapsedTime"].Value),
                 RemainingTime = ParseTime(match.Groups["RemainingTime"].Value),
@@ -36,8 +35,6 @@ namespace BlenderRenderFarm {
                 DenoisedTiles = int.Parse(match.Groups["DenoisedTiles"].Value)
             };
 
-            return output;
-
             static TimeSpan ParseTime(ReadOnlySpan<char> value) {
                 var colonIndex = value.IndexOf(':');
                 // var dotIndex = value[colonIndex..].IndexOf('.');
@@ -45,7 +42,7 @@ namespace BlenderRenderFarm {
                 var secondsStr = value[(colonIndex+1)..];
                 var minutes = int.Parse(minutesStr);
                 var seconds = double.Parse(secondsStr);
-                return TimeSpan.FromSeconds(minutes * 60 + seconds);
+                return TimeSpan.FromSeconds((minutes * 60) + seconds);
             }
         }
     }

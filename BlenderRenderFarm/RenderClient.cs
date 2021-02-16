@@ -1,5 +1,6 @@
-﻿using Basic.Tcp;
-using BlenderRenderFarm.Messages;
+﻿using BlenderRenderFarm.Messages;
+using Flare.Tcp;
+using Memowned;
 using MessagePack;
 using System;
 using System.Net;
@@ -8,59 +9,56 @@ using System.Threading.Tasks;
 
 namespace BlenderRenderFarm {
     public class RenderClient : IDisposable {
-
-        private readonly BasicTcpClient Client;
+        private readonly ConcurrentFlareTcpClient Client = new();
 
         public event RenderInitEventHandler? RenderInit;
         public delegate void RenderInitEventHandler(byte[] blendFileBytes);
         public event FrameAssignedEventHandler? FrameAssigned;
-        public delegate void FrameAssignedEventHandler(Index frameIndex);
+        public delegate void FrameAssignedEventHandler(uint frameIndex);
         public event FrameCancelledEventHandler? FramesCancelled;
-        public delegate void FrameCancelledEventHandler(Range frameIndex, string reason);
+        public delegate void FrameCancelledEventHandler(uint[] frameIndex, string reason);
 
         public RenderClient() {
-            Client = new BasicTcpClient();
             Client.MessageReceived += Client_MessageReceived;
             // Client.Connected += Client_Connected;
             // Client.Disconnected += Client_Disconnected;
         }
 
-        public async Task ConnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default) {
-            await Client.ConnectAsync(endPoint, cancellationToken).ConfigureAwait(false);
-            await Client.ReadMessagesAsync(cancellationToken).ConfigureAwait(false);
+        public ValueTask ConnectAsync(IPEndPoint endPoint, CancellationToken cancellationToken = default) {
+            return Client.ConnectAsync(endPoint, cancellationToken);
         }
 
         public void Disconnect() {
             Client.Disconnect();
         }
 
-        public void SendProgress(Index frameIndex, TimeSpan remaining) {
+        public void SendProgress(uint frameIndex, TimeSpan remaining) {
             SendMessage(new FrameRenderProgressMessage() {
                 FrameIndex = frameIndex,
                 RemainingTime = remaining
             });
         }
-        public void SendFrameBytes(Index frameIndex, byte[] frameBytes) {
+        public void SendFrameBytes(uint frameIndex, byte[] frameBytes) {
             SendMessage(new DeliverRenderedFrameMessage() {
                 FrameIndex = frameIndex,
                 ImageBytes = frameBytes
             });
         }
-        public void SendFrameFailure(Index frameIndex, string reason) {
+        public void SendFrameFailure(uint frameIndex, string reason) {
             SendMessage(new FrameRenderFailureMessage() {
                 FrameIndex = frameIndex,
                 Reason = reason
             });
         }
 
-        private void Client_MessageReceived(Span<byte> message) {
-            var messageObject = MessagePackSerializer.Typeless.Deserialize(message.ToArray());
+        private void Client_MessageReceived(RentedMemory<byte> message) {
+            var messageObject = MessagePackSerializer.Typeless.Deserialize(message.Memory);
             HandleMessage(messageObject);
         }
 
         private void SendMessage(object message) {
             var bytes = MessagePackSerializer.Typeless.Serialize(message);
-            Task.Run(() => Client.SendMessageAsync(bytes));
+            Client.EnqueueMessage(bytes);
         }
 
         private void HandleMessage(object messageObject) {
@@ -95,6 +93,7 @@ namespace BlenderRenderFarm {
 
         public void Dispose() {
             Client?.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

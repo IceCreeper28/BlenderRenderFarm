@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace BlenderRenderFarm {
     public class BlenderRender {
-
         private string _blenderPath;
         private string _blendFilePath;
         private string _renderOutput;
@@ -25,7 +24,7 @@ namespace BlenderRenderFarm {
             set {
                 _renderOutput = value;
 
-                if (!_renderOutput.StartsWith("//")) // check if not relative path
+                if (!_renderOutput.StartsWith("//", StringComparison.Ordinal)) // check if not relative path
                     _renderOutput = Path.GetFullPath(_renderOutput);
             }
         }
@@ -104,7 +103,7 @@ namespace BlenderRenderFarm {
             var filePath = fileWithMask.AsSpan().Replace(maskStartIndex, maskLength, paddedFrameIndex);
 
             // make file path absolute
-            if (filePath.StartsWith("//")) {
+            if (filePath.StartsWith("//", StringComparison.Ordinal)) {
                 var relativePath = fileWithMask[2..];
                 var directory = Path.GetDirectoryName(BlendFilePath);
                 filePath = Path.GetFullPath(relativePath, directory!);
@@ -124,6 +123,5 @@ namespace BlenderRenderFarm {
                     return file;
             return null;
         }
-
     }
 }

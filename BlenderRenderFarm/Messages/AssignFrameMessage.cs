@@ -3,10 +3,8 @@ using System;
 
 namespace BlenderRenderFarm.Messages {
     [MessagePackObject]
-    public class AssignFrameMessage {
-
+    public sealed class AssignFrameMessage {
         [Key(0)]
-        public Index FrameIndex { get; init; }
-
+        public int FrameIndex { get; init; }
     }
 }

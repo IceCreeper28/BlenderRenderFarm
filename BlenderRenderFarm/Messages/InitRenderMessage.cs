@@ -2,10 +2,8 @@
 
 namespace BlenderRenderFarm.Messages {
     [MessagePackObject]
-    public class InitRenderMessage {
-
+    public sealed class InitRenderMessage {
         [Key(0)]
         public byte[] BlendFileBytes { get; init; }
-
     }
 }
