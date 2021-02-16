@@ -44,7 +44,7 @@ namespace BlenderRenderFarm {
 
         private bool TryGetNextFrame(out uint nextFrame) {
             nextFrame = Interlocked.Increment(ref NextFrame) - 1;
-            return nextFrame.Value < FrameCount; // TODO
+            return nextFrame < FrameCount; // TODO
         }
 
         private void Server_ClientConnected(long clientId) {
