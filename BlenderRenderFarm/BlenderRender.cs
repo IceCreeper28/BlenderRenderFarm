@@ -7,26 +7,21 @@ using BlenderRenderFarm.Extensions;
 
 namespace BlenderRenderFarm {
     public class BlenderRender {
-        private string _blenderPath;
-        private string _blendFilePath;
-        private string _renderOutput;
+        public string BlenderPath { get; }
+        public string BlendFilePath { get; }
+        public string RenderOutput { get; }
 
-        public string BlenderPath {
-            get => _blenderPath;
-            init => _blenderPath = Path.GetFullPath(value);
-        }
-        public string BlendFilePath {
-            get => _blendFilePath;
-            init => _blendFilePath = Path.GetFullPath(value);
-        }
-        public string RenderOutput {
-            get => _renderOutput;
-            init {
-                _renderOutput = value;
+        public BlenderRender(string blenderPath, string blendFilePath, string renderOutput) {
+            BlenderPath = Path.GetFullPath(blenderPath);
+            BlendFilePath = Path.GetFullPath(blendFilePath);
 
-                if (!_renderOutput.StartsWith("//", StringComparison.Ordinal))
-                    _renderOutput = Path.GetFullPath(_renderOutput);
+            // paths starting with // are relative to the blend file.
+            if (!renderOutput.StartsWith("//", StringComparison.Ordinal)) {
+                var blendDirectory = Path.GetDirectoryName(BlendFilePath)!;
+                var relativeRenderOutputPath = renderOutput[2..];
+                renderOutput = Path.Combine(blendDirectory, relativeRenderOutputPath);
             }
+            RenderOutput = Path.GetFullPath(renderOutput);
         }
 
         public event EventHandler<string>? Output;
@@ -98,16 +93,7 @@ namespace BlenderRenderFarm {
 
             // replace mask
             var paddedFrameIndex = frameIndex.ToString().PadLeft(maskLength, '0');
-            var filePath = fileWithMask.AsSpan().Replace(maskStartIndex, maskLength, paddedFrameIndex);
-
-            // make file path absolute
-            if (filePath.StartsWith("//", StringComparison.Ordinal)) {
-                var relativePath = fileWithMask[2..];
-                var directory = Path.GetDirectoryName(BlendFilePath);
-                filePath = Path.GetFullPath(relativePath, directory!);
-            }
-
-            return filePath;
+            return fileWithMask.AsSpan().Replace(maskStartIndex, maskLength, paddedFrameIndex);
         }
         public string GetFramePath(uint frameIndex, string extension) {
             return Path.ChangeExtension(GetFramePathWithoutExtension(frameIndex), extension);

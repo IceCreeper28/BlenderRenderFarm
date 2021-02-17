@@ -33,27 +33,20 @@ namespace BlenderRenderFarm {
         }
 
         public void SendProgress(uint frameIndex, TimeSpan remaining) {
-            SendMessage(new FrameRenderProgressMessage() {
-                FrameIndex = frameIndex,
-                RemainingTime = remaining
-            });
+            SendMessage(new FrameRenderProgressMessage(frameIndex, remaining));
         }
         public void SendFrameBytes(uint frameIndex, byte[] frameBytes) {
-            SendMessage(new DeliverRenderedFrameMessage() {
-                FrameIndex = frameIndex,
-                ImageBytes = frameBytes
-            });
+            SendMessage(new DeliverRenderedFrameMessage(frameIndex, frameBytes));
         }
         public void SendFrameFailure(uint frameIndex, string reason) {
-            SendMessage(new FrameRenderFailureMessage() {
-                FrameIndex = frameIndex,
-                Reason = reason
-            });
+            SendMessage(new FrameRenderFailureMessage(frameIndex, reason));
         }
 
         private void Client_MessageReceived(RentedMemory<byte> message) {
-            var messageObject = MessagePackSerializer.Typeless.Deserialize(message.Memory);
-            HandleMessage(messageObject);
+            using (message) {
+                var messageObject = MessagePackSerializer.Typeless.Deserialize(message.Memory);
+                HandleMessage(messageObject);
+            }
         }
 
         private void SendMessage(object message) {
@@ -62,20 +55,18 @@ namespace BlenderRenderFarm {
         }
 
         private void HandleMessage(object messageObject) {
-            lock (Client) { // TODO
-                switch (messageObject) {
-                    case InitRenderMessage message:
-                        OnRenderInit(message);
-                        break;
-                    case AssignFrameMessage message:
-                        OnFrameAssigned(message);
-                        break;
-                    case CancelFrameRenderMessage message:
-                        OnFramesCancelled(message);
-                        break;
-                    default:
-                        throw new NotSupportedException("The given message is not supported: " + messageObject);
-                }
+            switch (messageObject) {
+                case InitRenderMessage message:
+                    OnRenderInit(message);
+                    break;
+                case AssignFrameMessage message:
+                    OnFrameAssigned(message);
+                    break;
+                case CancelFrameRenderMessage message:
+                    OnFramesCancelled(message);
+                    break;
+                default:
+                    throw new NotSupportedException("The given message is not supported: " + messageObject);
             }
         }
 

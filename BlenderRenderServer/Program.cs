@@ -14,7 +14,7 @@ namespace BlenderRenderServer {
             var blendFilePath = Console.ReadLine().Trim();
 
             var blendFileBytes = File.ReadAllBytes(blendFilePath);
-            using RenderServer server = new(blendFileBytes, 10);
+            using RenderServer server = new(blendFileBytes, 0, 10);
             server.FrameReceived += (frameIndex, _) => {
                 Console.WriteLine("Frame received: " + frameIndex);
             };

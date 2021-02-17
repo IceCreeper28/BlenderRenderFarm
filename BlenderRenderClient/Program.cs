@@ -28,11 +28,7 @@ namespace RenderClient {
                 Directory.CreateDirectory(renderOutputDirectory);
                 var renderOutputScheme = Path.Combine(renderOutputDirectory, "frame######");
 
-                var render = new BlenderRender() {
-                    BlenderPath = blenderPath,
-                    BlendFilePath = blendFilePath,
-                    RenderOutput = renderOutputScheme
-                };
+                var render = new BlenderRender(blenderPath, blendFilePath, renderOutputDirectory);
 
                 render.Output += (_, e) => Console.Out.WriteLine(e);
                 render.Error += (_, e) => Console.Error.WriteLine(e);
@@ -49,9 +45,9 @@ namespace RenderClient {
                     Task.Run(async () => {
                         Console.WriteLine($"Rendering frame {frameIndex}...");
                         try {
-                            await render.RenderFrameAsync(frameIndex).ConfigureAwait(false); // TODO
+                            await render.RenderFrameAsync(frameIndex).ConfigureAwait(false);
                             Console.WriteLine($"Finished rendering frame {frameIndex}");
-                            var framePath = render.FindFrameFile(frameIndex); // TODO
+                            var framePath = render.FindFrameFile(frameIndex);
                             var frameBytes = File.ReadAllBytes(framePath);
                             client.SendFrameBytes(frameIndex, frameBytes);
                         } catch (Exception e) {
