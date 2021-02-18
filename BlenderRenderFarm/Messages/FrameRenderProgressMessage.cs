@@ -1,17 +1,20 @@
-﻿using MessagePack;
+﻿using System;
+using MessagePack;
 
 namespace BlenderRenderFarm.Messages {
     [MessagePackObject]
-    public sealed class DeliverRenderedFrameMessage {
-        public DeliverRenderedFrameMessage(uint frameIndex, byte[] imageBytes) {
+    public sealed class FrameRenderProgressMessage {
+        public FrameRenderProgressMessage(uint frameIndex, TimeSpan remainingTime) {
             FrameIndex = frameIndex;
-            ImageBytes = imageBytes;
+            RemainingTime = remainingTime;
         }
 
         [Key(0)]
         public uint FrameIndex { get; }
 
         [Key(1)]
-        public byte[] ImageBytes { get; }
+        public TimeSpan RemainingTime { get; }
+
+        // TODO add more progress info
     }
 }
