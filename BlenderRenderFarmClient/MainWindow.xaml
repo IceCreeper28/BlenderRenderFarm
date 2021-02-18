@@ -6,9 +6,80 @@
         xmlns:ui="http://schemas.modernwpf.com/2019"
         xmlns:local="clr-namespace:BlenderRenderFarmClient"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800"
-        ui:WindowHelper.UseModernWindowStyle="True">
-    <Grid>
+        Title="MainWindow" MinHeight="450" Height="450" MinWidth="800" Width="800"
+        ui:WindowHelper.UseModernWindowStyle="True"
+        Background="{DynamicResource SystemControlPageBackgroundAltHighBrush}"
+        Foreground="{DynamicResource SystemControlPageTextBaseHighBrush}"
+        ui:ThemeManager.IsThemeAware="True">
+    <Grid Margin="16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
 
+        <ui:SimpleStackPanel Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="7" Grid.RowSpan="3" Orientation="Vertical" Spacing="5">
+            <ui:SimpleStackPanel Orientation="Horizontal" Spacing="5">
+                <ui:SimpleStackPanel Orientation="Vertical" Spacing="5">
+                    <Label Content="Server IP"/>
+                    <TextBox Text="255.255.255.255" Width="155" MaxWidth="155" MaxLength="15" MaxLines="1"/>
+                </ui:SimpleStackPanel>
+                <ui:SimpleStackPanel Orientation="Vertical" Spacing="5">
+                    <Label Content="Server Port"/>
+                    <ui:SimpleStackPanel Orientation="Horizontal" Spacing="5">
+                        <TextBox Text="65565" Width="90" MaxWidth="90" MaxLength="5" MaxLines="1"/>
+                        <Button Content="Connect"/>
+                    </ui:SimpleStackPanel>
+                </ui:SimpleStackPanel>
+
+            </ui:SimpleStackPanel>
+            <ui:SimpleStackPanel Spacing="5">
+                <Label Content="Rendering Progress"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition MinWidth="40" Width="40"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ui:ProgressBar Value="100" Maximum="100" Height="8" HorizontalAlignment="Stretch"/>
+                    <TextBlock Grid.Column="1" Margin="5 0 0 0" HorizontalAlignment="Right" Text="100%"/>
+                </Grid>
+            </ui:SimpleStackPanel>
+            <ui:SimpleStackPanel Spacing="5">
+                <Label Content="Compositing Progress"/>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition MinWidth="40" Width="40"/>
+                    </Grid.ColumnDefinitions>
+
+                    <ui:ProgressBar Value="12" Maximum="100" Height="8" HorizontalAlignment="Stretch"/>
+                    <TextBlock Grid.Column="1" Margin="5 0 0 0" HorizontalAlignment="Right" Text="12%"/>
+                </Grid>
+            </ui:SimpleStackPanel>
+        </ui:SimpleStackPanel>
+        <TextBox Grid.Row="3" Grid.Column="0" Grid.RowSpan="4" Grid.ColumnSpan="7" IsReadOnly="True"
+                 AcceptsReturn="True"
+                 TextWrapping="NoWrap"
+                 VerticalContentAlignment="Stretch"
+                 HorizontalScrollBarVisibility="Auto"
+                 VerticalScrollBarVisibility="Auto"
+>
+            Fra:10 Mem:261.91M (0.00M, Peak 265.41M) | Time:00:03.52 | Remaining:00:06.14 | Mem:3.70M, Peak:3.70M | Scene, View Layer | Rendered 158/510 Tiles, Prefiltered 117 tiles
+            Fra:10 Mem:261.91M (0.00M, Peak 265.41M) | Time:00:03.52 | Remaining:00:06.14 | Mem:3.70M, Peak:3.70M | Scene, View Layer | Rendered 158/510 Tiles, Prefiltered 117 tiles
+        </TextBox>
     </Grid>
 </Window>
