@@ -13,11 +13,11 @@ using Semver;
 namespace BlenderRenderFarm {
     public static class BlenderUtils {
         public static SemVersion GetBlenderVersionFromBlendFile(string path) {
-            var buffer = new char[20];
+            Span<char> buffer = stackalloc char[20];
             using (var reader = new StreamReader(File.OpenRead(path))) {
-                reader.Read(buffer, 0, buffer.Length);
+                reader.Read(buffer);
             }
-            return GetBlenderVersionFromBlendFileChars(buffer.AsSpan());
+            return GetBlenderVersionFromBlendFileChars(buffer);
         }
         public static SemVersion GetBlenderVersionFromBlendFileBytes(ReadOnlySpan<byte> bytes) {
             return GetBlenderVersionFromBlendFileChars(MemoryMarshal.Cast<byte, char>(bytes));
@@ -38,8 +38,8 @@ namespace BlenderRenderFarm {
         }
 
         public static Dictionary<SemVersion, string> GetAvailableBlenderExecutables() {
-            var defaultExePath = GetDefaultBlenderExecutablePath().ToString();
-            var defaultCommonPath = Path.GetDirectoryName(Path.GetDirectoryName(defaultExePath)!)!;
+            var defaultExePath = GetDefaultBlenderExecutablePath();
+            var defaultCommonPath = Path.GetDirectoryName(Path.GetDirectoryName(defaultExePath));
 
             var programFilesX64Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles, Environment.SpecialFolderOption.DoNotVerify);
             var blenderX64CommonPath = Path.Combine(programFilesX64Path, "Blender Foundation");
@@ -47,7 +47,7 @@ namespace BlenderRenderFarm {
             var programFilesX86Path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86, Environment.SpecialFolderOption.DoNotVerify);
             var blenderX86CommonPath = Path.Combine(programFilesX86Path, "Blender Foundation");
 
-            var commonPaths = new string[] { defaultCommonPath, blenderX86CommonPath, blenderX64CommonPath };
+            var commonPaths = new string[] { defaultCommonPath.ToString(), blenderX86CommonPath, blenderX64CommonPath };
 
             return commonPaths.Distinct()
                 .SelectMany(path => Directory.GetDirectories(path))
