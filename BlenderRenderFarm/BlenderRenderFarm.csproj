@@ -5,6 +5,9 @@
     <TargetFramework>net5.0</TargetFramework>
     <Nullable>Enable</Nullable>
     <NeutralLanguage>en</NeutralLanguage>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>
