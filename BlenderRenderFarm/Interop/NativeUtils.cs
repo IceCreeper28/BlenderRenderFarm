@@ -16,7 +16,7 @@ namespace BlenderRenderFarm.Interop {
                 var size = 0u;
                 ThrowExceptionForHR(query->GetString(Constants.ASSOCF_NOTRUNCATE, ASSOCSTR.ASSOCSTR_EXECUTABLE, null, null, ref size));
 
-                var data = new string(stackalloc char[(int)size]);
+                var data = new string('\0', (int)size);
                 ThrowExceptionForHR(query->GetString(Constants.ASSOCF_NOTRUNCATE, ASSOCSTR.ASSOCSTR_EXECUTABLE, null, data, ref size));
 
                 return data.AsSpan(0, data.Length - 1);
