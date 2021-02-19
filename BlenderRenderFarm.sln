@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlenderRenderClient", "Blen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlenderRenderServer", "BlenderRenderServer\BlenderRenderServer.csproj", "{222292FA-EC9D-40B4-9CCF-10964BD50734}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlenderRenderFarmClient", "BlenderRenderFarmClient\BlenderRenderFarmClient.csproj", "{42657033-1869-4631-8997-96348F4FBB03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlenderRenderFarmClient", "BlenderRenderFarmClient\BlenderRenderFarmClient.csproj", "{42657033-1869-4631-8997-96348F4FBB03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BlenderRenderFarm.Interop", "BlenderRenderFarm.Interop\BlenderRenderFarm.Interop.csproj", "{A98927F2-8B7D-4160-A993-2FE3ED11DEC4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{42657033-1869-4631-8997-96348F4FBB03}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{42657033-1869-4631-8997-96348F4FBB03}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{42657033-1869-4631-8997-96348F4FBB03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A98927F2-8B7D-4160-A993-2FE3ED11DEC4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A98927F2-8B7D-4160-A993-2FE3ED11DEC4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A98927F2-8B7D-4160-A993-2FE3ED11DEC4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A98927F2-8B7D-4160-A993-2FE3ED11DEC4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
